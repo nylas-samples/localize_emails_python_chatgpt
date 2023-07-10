@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-green-300 border-green-600 border-b p-4 m-4 rounded grid place-items-center">
+	<h1 class="text-3xl"> The email was sent to the following addresses</h1>
+	<br>
+	{% for email in emails: %}
+		<p class="font-semibold">{{ email }}</p>
+	{% endfor %}
+</div>
+
+<div class="bg-green-300 border-green-600 border-b p-4 m-4 rounded grid place-items-center">
+<a href="/" class="text-blue-600">Go back</a>
+</div>
+{% endblock %}

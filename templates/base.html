@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<title>Localized Emails</title>
+</head>
+<body>
+<div id="container">		
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+      <div class="flash bg-green-300 border-green-600 border-b p-4 m-4 rounded grid place-items-center text-red-600 font-bold">
+        {{ message }}
+      </div>  
+      {% endfor %}
+    {% endif %}
+  {% endwith %}	
+  {% block content %}  
+  {% endblock %}
+</div>
+</body>
+</html>

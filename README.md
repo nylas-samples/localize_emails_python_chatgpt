@@ -35,6 +35,8 @@ $ pip3 install Flask # Micro framework
 $ pip3 install Flask-session # Sessions for Flask
 ```
 
+Create a .csv file similar to this one:
+
 <img width="728" alt="image" src="https://github.com/nylas-samples/localize_emails_python_chatgpt/assets/1071110/1bd1238e-feac-4aff-a557-ed0d02b63009">
 
 ## Usage

@@ -5,7 +5,7 @@ import os
 import openai
 import csv
 import re
-from nylas import APIClient
+from nylas import Client
 
 # Load your env variables
 from dotenv import load_dotenv
@@ -18,10 +18,8 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Initialize your Nylas API client
-nylas = APIClient(
-    os.environ.get("CLIENT_ID"),
-    os.environ.get("CLIENT_SECRET"),
-    os.environ.get("ACCESS_TOKEN")
+nylas = Client(
+    api_key = os.environ.get("V3_API_KEY")
 )
 
 # Initialize your Open API client
@@ -70,10 +68,10 @@ def index():
 # Assign parameters to auxiliary variables				
                 subject_replaced = subject
                 body_replaced = body
-# Read all headers				
+# Read all headers 
                 for header in headers:
 # Search for header and replace them with
-# the content on the CSV file					
+# the content on the CSV file
                     if re.search("{"+f"{header}"+"}", subject):
                         subject_replaced = re.sub("{"+f"{header}"+"}", row[row_header[f"{header}"]], subject_replaced)
                     if re.search("{"+f"{header}"+"}", body):
@@ -89,33 +87,27 @@ def index():
 # Prompt for ChatGPT					
                     prompt = """
                     Translate the following message into language
-	
-                    message: text_here
-                    translation:
+                    text_here
                     """
 # Replace Language and text_here with proper information					
                     prompt = re.sub("language", row[row_header["Language"]], prompt)
                     prompt = re.sub("text_here", body_replaced, prompt)
 # Call ChatGPT
-                    response = openai.Completion.create(model="text-davinci-003", prompt=prompt, max_tokens=100, temperature=0)
+                    response = openai.ChatCompletion.create(model="gpt-3.5-turbo",  messages=[{"role": "user", "content": prompt}])
 # Add response to the body of the email
-                    body_replaced = body_replaced + "\n\n---" + f'{row[row_header["Language"]]}' + " translation follows---\n" + response["choices"][0]["text"]
+                    body_replaced = body_replaced + "\n\n---" + f'{row[row_header["Language"]]}' + " translation follows---\n\n" + response.choices[0].message.content
 # Replace carriage returns with break lines
                     body_replaced = re.sub('\n', '<br>', body_replaced)
                 else:
                     body_replaced = re.sub('\n', '<br>', body_replaced)
 # Try to send an email
                 try:
-# Create the draft					
-                    draft = nylas.drafts.create()
-# Add the subject					
-                    draft.subject = subject_replaced
-# Add the body
-                    draft.body = body_replaced
-# Add the recipient and email					
-                    draft.to = [{"name":full_name,"email":row[row_header["Email"]]}]
-# Send the email					
-                    draft.send()
+                    email_body = {"subject" : subject_replaced, 
+                                           "body": body_replaced,
+                                           "to":[{"name": full_name,
+                                           "email": row[row_header["Email"]]}]}
+                               
+                    nylas.messages.send(os.environ.get("GRANT_ID"), request_body = email_body)
 # It was successful, added to the emails array					
                     email = row[row_header["Email"]]
                     emails.append(email)

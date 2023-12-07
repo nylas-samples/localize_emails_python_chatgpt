@@ -2,8 +2,6 @@
 
 This sample will show you to localize your emails using ChatGPT and mail merge templates.
 
-You can follow along step-by-step in our blog post ["Localize Your Emails With ChatGPT and Python"](https://www.nylas.com/blog/localize-your-emails-with-chatgpt-and-python/).
-
 ## Setup
 
 ### System dependencies
@@ -15,9 +13,8 @@ You can follow along step-by-step in our blog post ["Localize Your Emails With C
 You'll need the following values:
 
 ```text
-CLIENT_ID = ""
-CLIENT_SECRET = ""
-ACCESS_TOKEN = ""
+V3_API_KEY = ""
+GRANT_ID = ""
 ```
 
 Add the above values to a new `.env` file:

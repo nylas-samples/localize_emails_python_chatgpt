@@ -22,6 +22,25 @@ nylas = Client(
     api_key = os.environ.get("V3_API_KEY")
 )
 
+def get_completion(prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", 
+        messages=[
+            {"role": "user", "content": f"{prompt}"}
+        ]        
+    )
+    return response.choices[0].message.content
+
+def get_prompt(language, to_replace):
+    prompt = """
+    Translate the following message into language
+    text_here
+    """
+    
+    prompt = re.sub("language", language, prompt)
+    prompt = re.sub("text_here", to_replace, prompt)
+    return prompt
+
 # Initialize your Open API client
 openai.api_key = os.environ.get("OPEN_AI")
 
@@ -84,20 +103,19 @@ def index():
                         print(f'{e}')
 # Translate only email where target language is not English
                 if row[row_header["Language"]] != "English":
-# Prompt for ChatGPT					
-                    prompt = """
-                    Translate the following message into language
-                    text_here
-                    """
-# Replace Language and text_here with proper information					
-                    prompt = re.sub("language", row[row_header["Language"]], prompt)
-                    prompt = re.sub("text_here", body_replaced, prompt)
+# Prompt for ChatGPT to add the body response
+                    prompt = get_prompt(row[row_header["Language"]], body_replaced) 
 # Call ChatGPT
-                    response = openai.ChatCompletion.create(model="gpt-3.5-turbo",  messages=[{"role": "user", "content": prompt}])
+                    response = get_completion(prompt)
 # Add response to the body of the email
-                    body_replaced = body_replaced + "\n\n---" + f'{row[row_header["Language"]]}' + " translation follows---\n\n" + response.choices[0].message.content
+                    body_replaced = body_replaced + "\n\n---" + f'{row[row_header["Language"]]}' + " translation follows---\n\n" + response
 # Replace carriage returns with break lines
                     body_replaced = re.sub('\n', '<br>', body_replaced)
+# Prompt for ChatGPT to add the subject response
+                    prompt = get_prompt(row[row_header["Language"]], subject_replaced)
+# Call ChatGPT
+                    response = get_completion(prompt)
+                    subject_replaced = subject_replaced + ' / ' + response
                 else:
                     body_replaced = re.sub('\n', '<br>', body_replaced)
 # Try to send an email
